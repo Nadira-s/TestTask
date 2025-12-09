@@ -34,6 +34,8 @@
 		53F8DACE2EE7F28C0059D96D /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 		53F8DACF2EE7F2A10059D96D /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		53F8DAD02EE7F2B80059D96D /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
+		53F8DAD22EE7FB790059D96D /* CoreDataManager..swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager..swift; sourceTree = "<group>"; };
+		53F8DAD72EE7FD770059D96D /* FeedModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = FeedModel.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -197,6 +199,8 @@
 		53F8DAC62EE7EDFE0059D96D /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
+				53F8DAD22EE7FB790059D96D /* CoreDataManager..swift */,
+				53F8DAD62EE7FD770059D96D /* FeedModel.xcdatamodeld */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -707,6 +711,19 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCVersionGroup section */
+		53F8DAD62EE7FD770059D96D /* FeedModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				53F8DAD72EE7FD770059D96D /* FeedModel.xcdatamodel */,
+			);
+			currentVersion = 53F8DAD72EE7FD770059D96D /* FeedModel.xcdatamodel */;
+			path = FeedModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 53F8DA812EE7ED0A0059D96D /* Project object */;
 }

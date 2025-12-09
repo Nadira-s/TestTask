@@ -1,73 +1,65 @@
-//
-//  PostCell.swift
-//  TestTask
-//
-//  Created by Nadira Seitkazy  on 09.12.2025.
-//
 import UIKit
 
 final class PostCell: UITableViewCell {
 
+    private let avatarView = UIImageView()
     private let titleLabel = UILabel()
     private let bodyLabel = UILabel()
-    private let avatarImageView = UIImageView()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupViews()
+        setupUI()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func setupViews() {
-        avatarImageView.translatesAutoresizingMaskIntoConstraints = false
-        avatarImageView.layer.cornerRadius = 20
-        avatarImageView.clipsToBounds = true
+    private func setupUI() {
+        avatarView.layer.cornerRadius = 25
+        avatarView.clipsToBounds = true
+        avatarView.backgroundColor = .secondarySystemBackground
 
         titleLabel.font = .boldSystemFont(ofSize: 16)
         titleLabel.numberOfLines = 2
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         bodyLabel.font = .systemFont(ofSize: 14)
-        bodyLabel.numberOfLines = 3
-        bodyLabel.translatesAutoresizingMaskIntoConstraints = false
+        bodyLabel.numberOfLines = 0
+        bodyLabel.textColor = .secondaryLabel
 
-        contentView.addSubview(avatarImageView)
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(bodyLabel)
+        let container = UIStackView(arrangedSubviews: [avatarView, titleLabel, bodyLabel])
+        container.axis = .vertical
+        container.spacing = 8
 
+        avatarView.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        avatarView.widthAnchor.constraint(equalToConstant: 50).isActive = true
+
+        contentView.addSubview(container)
+
+        container.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            avatarImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
-            avatarImageView.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 10),
-            avatarImageView.widthAnchor.constraint(equalToConstant: 40),
-            avatarImageView.heightAnchor.constraint(equalToConstant: 40),
-
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
-            titleLabel.leftAnchor.constraint(equalTo: avatarImageView.rightAnchor, constant: 10),
-            titleLabel.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -10),
-
-            bodyLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 5),
-            bodyLabel.leftAnchor.constraint(equalTo: avatarImageView.rightAnchor, constant: 10),
-            bodyLabel.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -10),
-            bodyLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10)
+            container.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            container.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            container.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            container.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
         ])
     }
 
-    func configure(with post: Post) {
+    func configure(with post: PostEntity) {
         titleLabel.text = post.title
         bodyLabel.text = post.body
 
-        // Случайная аватарка через Lorem Picsum
-        let avatarURL = URL(string: "https://picsum.photos/200?random=\(post.userId)")!
-        DispatchQueue.global().async {
-            if let data = try? Data(contentsOf: avatarURL) {
-                DispatchQueue.main.async {
-                    self.avatarImageView.image = UIImage(data: data)
-                }
+        let imageURL = URL(string: "https://picsum.photos/200?random=\(post.id)")!
+        loadImage(from: imageURL)
+    }
+
+    private func loadImage(from url: URL) {
+        URLSession.shared.dataTask(with: url) { data, _, _ in
+            guard let data = data else { return }
+            DispatchQueue.main.async {
+                self.avatarView.image = UIImage(data: data)
             }
-        }
+        }.resume()
     }
 }
 

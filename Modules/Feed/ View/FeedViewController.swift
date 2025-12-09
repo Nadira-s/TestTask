@@ -1,108 +1,68 @@
-//
-//  FeedViewController.swift
-//  TestTask
-//
-//  Created by Nadira Seitkazy  on 09.12.2025.
-//
-
 import UIKit
 
 final class FeedViewController: UIViewController {
 
     private let tableView = UITableView()
+    private let refreshControl = UIRefreshControl()
+
     private let viewModel = FeedViewModel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Feed"
-        view.backgroundColor = .white
-
-        setupTableView()
-        setupBindings()
-
-        viewModel.loadFeed()
+        setupUI()
+        bindViewModel()
+        viewModel.loadPosts()
     }
 
-    private func setupTableView() {
-        view.addSubview(tableView)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
-            tableView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            tableView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+    private func setupUI() {
+        title = "Feed"
+        view.backgroundColor = .systemBackground
 
         tableView.register(PostCell.self, forCellReuseIdentifier: "PostCell")
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 120
 
-        // Pull-to-refresh
-        let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(refreshPulled), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(refreshFeed), for: .valueChanged)
         tableView.refreshControl = refreshControl
+
+        view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 
-    private func setupBindings() {
-        viewModel.onDataUpdated = { [weak self] in
-            DispatchQueue.main.async {
-                self?.tableView.reloadData()
-                self?.tableView.refreshControl?.endRefreshing()
-            }
+    private func bindViewModel() {
+        viewModel.onUpdate = { [weak self] in
+            self?.refreshControl.endRefreshing()
+            self?.tableView.reloadData()
         }
-
-        viewModel.onError = { [weak self] message in
-            DispatchQueue.main.async {
-                self?.tableView.refreshControl?.endRefreshing()
-                self?.showError(message)
-            }
-        }
     }
 
-    @objc private func refreshPulled() {
-        viewModel.refresh()
-    }
-
-    private func showError(_ message: String) {
-        let alert = UIAlertController(title: "Error",
-                                      message: message,
-                                      preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+    @objc private func refreshFeed() {
+        viewModel.loadPosts()
     }
 }
 
-// MARK: - UITableViewDataSource
-extension FeedViewController: UITableViewDataSource {
+extension FeedViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.displayedPosts.count
+        return viewModel.posts.count
     }
 
-    func tableView(_ tableView: UITableView,
-                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell",
-                                                       for: indexPath) as? PostCell else {
-            return UITableViewCell()
-        }
+        let post = viewModel.posts[indexPath.row]
 
-        let post = viewModel.displayedPosts[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as! PostCell
         cell.configure(with: post)
         return cell
     }
 }
 
-// MARK: - UITableViewDelegate (для пагинации)
-extension FeedViewController: UITableViewDelegate {
-
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
-        let height = scrollView.frame.size.height
-
-        if offsetY > contentHeight - height - 100 {
-            viewModel.loadMore()
-        }
-    }
-}

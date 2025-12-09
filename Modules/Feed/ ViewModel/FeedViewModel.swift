@@ -23,16 +23,18 @@ final class FeedViewModel {
     // MARK: - Load initial data
     func loadFeed() {
         NetworkService.shared.getPosts { [weak self] result in
-            switch result {
-            case .success(let posts):
-                self?.allPosts = posts
-                self?.resetPagination()
-                self?.onDataUpdated?()
+                switch result {
+                case .success(let posts):
+                    self?.allPosts = posts
+                    self?.savePostsToCoreData(posts)   // сохраняем оффлайн
+                    self?.resetPagination()
+                    self?.onDataUpdated?()
 
-            case .failure(let error):
-                self?.onError?(error.localizedDescription)
+                case .failure(_):
+                    self?.loadPostsFromCoreData()     // если нет сети, показываем оффлайн
+                    self?.onError?("Failed to load from network, showing offline data.")
+                }
             }
-        }
     }
 
     // Pull-to-refresh
